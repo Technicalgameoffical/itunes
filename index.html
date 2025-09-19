@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>iTunes - Device Locked & Account Info</title>
+  <style>
+    /* Reset & base */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      background: #f6f6f6;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      color: #333;
+      user-select: none;
+    }
+    button {
+      font-family: inherit;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    /* Container */
+    .container {
+      width: 980px;
+      margin: 30px auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 18px rgb(0 0 0 / 0.15);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: text;
+    }
+
+    /* Header */
+    header {
+      background: #fafafa;
+      border-bottom: 1px solid #ddd;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      user-select: none;
+    }
+    .apple-icon {
+      width: 20px;
+      height: 24px;
+      fill: #333;
+      flex-shrink: 0;
+    }
+    .device-name {
+      font-weight: 700;
+      font-size: 16px;
+      flex-grow: 1;
+    }
+    .storage-info {
+      font-size: 13px;
+      color: #666;
+      user-select: text;
+    }
+    header button {
+      width: 26px;
+      height: 26px;
+      background: transparent;
+      border: none;
+      font-weight: 700;
+      font-size: 20px;
+      line-height: 1;
+      color: #777;
+      cursor: pointer;
+      user-select: none;
+      padding: 0;
+    }
+    header button:hover {
+      color: #000;
+    }
+
+    /* Info bar */
+    .info-bar {
+      background: #e8f0fe;
+      color: #1967d2;
+      font-weight: 600;
+      padding: 10px 20px;
+      user-select: text;
+    }
+
+    /* Main area */
+    .main {
+      display: flex;
+      min-height: 540px;
+    }
+
+    /* Sidebar */
+    aside.sidebar {
+      width: 260px;
+      background: #f9f9f9;
+      border-right: 1px solid #ddd;
+      display: flex;
+      flex-direction: column;
+      padding: 15px 10px;
+      user-select: none;
+    }
+    .device-section {
+      text-align: center;
+      padding: 20px 0;
+      border-bottom: 1px solid #ddd;
+      user-select: text;
+    }
+    .device-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 10px;
+      background: url("https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_logo_black.svg/512px-Apple_logo_black.svg.png") no-repeat center;
+      background-size: contain;
+      opacity: 0.3;
+    }
+    .device-name-sidebar {
+      font-weight: 700;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+    .storage-sidebar,
+    .battery-sidebar {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    /* Tabs */
+    nav.tabs ul {
+      list-style: none;
+      margin: 20px 0 10px 0;
+      padding: 0;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      gap: 12px;
+      user-select: none;
+    }
+    nav.tabs li {
+      padding: 8px 14px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      border-bottom: none;
+      font-weight: 600;
+      font-size: 14px;
+      border-radius: 6px 6px 0 0;
+      color: #666;
+      user-select: none;
+      transition: all 0.15s ease-in-out;
+    }
+    nav.tabs li.active {
+      background: white;
+      color: #111;
+      border-color: #ddd #ddd white;
+      cursor: default;
+      user-select: text;
+    }
+    nav.tabs li:focus-visible {
+      outline: 2px solid #007aff;
+      outline-offset: 2px;
+    }
+
+    /* Library menu */
+    nav.library strong {
+      font-size: 14px;
+      margin-bottom: 10px;
+      display: block;
+      color: #333;
+      user-select: none;
+    }
+    nav.library ul.menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      user-select: none;
+    }
+    nav.library ul.menu li {
+      padding: 10px 12px;
+      cursor: pointer;
+      font-size: 14px;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #444;
+      user-select: none;
+      transition: background-color 0.15s;
+    }
+    nav.library ul.menu li.active,
+    nav.library ul.menu li:hover {
+      background: #007aff;
+      color: white;
+      user-select: text;
+    }
+    nav.library ul.menu li svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+      flex-shrink: 0;
+    }
+
+    /* Content area */
+    section.content {
+      flex-grow: 1;
+      background: white;
+      padding: 20px 30px;
+      overflow-y: auto;
+      outline: none;
+      user-select: text;
+    }
+
+    .tab-content {
+      user-select: text;
+    }
+
+    /* Device Locked heading */
+    .device-locked {
+      color: #b22222;
+      font-weight: 700;
+      user-select: text;
+      margin-bottom: 20px;
+      font-size: 22px;
+    }
+
+    h1 {
+      font-weight: 700;
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 24px;
+      user-select: text;
+    }
+    h1 strong {
+      font-weight: 700;
+    }
+    p {
+      margin: 0 0 12px 0;
+      line-height: 1.4;
+      user-select: text;
+    }
+    strong {
+      font-weight: 600;
+    }
+
+    /* Lists styling */
+    ul.gmail-list, ul.tiktok-list, ul.instagram-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 20px 0;
+    }
+    ul.gmail-list li,
+    ul.tiktok-list li,
+    ul.instagram-list li {
+      background: #feecec;
+      border: 1px solid #f5c6cb;
+      color: #a94442;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      user-select: text;
+    }
+    ul.gmail-list li span {
+      font-style: italic;
+      margin-left: 10px;
+      color: #6a6a6a;
+      font-weight: 400;
+      flex-grow: 1;
+    }
+    button.remove-btn {
+      background-color: #d9534f;
+      border: none;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: background-color 0.3s;
+      user-select: none;
+      flex-shrink: 0;
+      margin-left: 10px;
+    }
+    button.remove-btn:hover {
+      background-color: #c12e2a;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="application" aria-label="iTunes UI Clone">
+    <header>
+      <svg class="apple-icon" viewBox="0 0 24 28" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+        <path d="M17.52 8.12c-.2-.23-1.33-1.77-2.9-1.92-1.21-.11-2.6.7-3.27.7-.68 0-1.75-.67-2.88-.65-1.48.03-2.85.86-3.61 2.18-1.55 2.7-.4 6.67 1.12 8.84.75 1.14 1.65 2.41 2.82 2.37 1.13-.04 1.55-.72 2.9-.72 1.34 0 1.8.72 2.9.7 1.25-.03 2.03-1.16 2.78-2.31.87-1.3 1.23-2.55 1.25-2.6-.02-.01-2.42-.94-2.44-3.67-.02-2.02 1.69-2.99 1.82-3.04z" />
+      </svg>
+      <div class="device-name" aria-label="Connected Device Name">Tshering iPhone</div>
+      <div class="storage-info" aria-label="Storage Information">256 GB Capacity</div>
+      <button aria-label="Minimize window" title="Minimize window">_</button>
+      <button aria-label="Maximize window" title="Maximize window">⬜</button>
+      <button aria-label="Close window" title="Close window">×</button>
+    </header>
+
+    <div class="info-bar" role="status" aria-live="polite">
+      You have iOS 25.0.0 on your device. It is up to date.
+    </div>
+
+    <div class="main" role="main">
+      <aside class="sidebar" role="navigation" aria-label="Sidebar navigation">
+        <div class="device-section">
+          <div class="device-icon" aria-hidden="true"></div>
+          <div class="device-name-sidebar">Tshering iPhone</div>
+          <div class="storage-sidebar">256 GB Capacity</div>
+          <div class="battery-sidebar">Battery: 85%</div>
+        </div>
+
+        <nav class="tabs" role="tablist" aria-label="Main tabs">
+          <ul>
+            <li class="active" role="tab" aria-selected="true" tabindex="0" data-tab="summary">Summary</li>
+            <li role="tab" aria-selected="false" tabindex="-1" data-tab="account-info">Account Info</li>
+            <li role="tab" aria-selected="false" tabindex="-1" data-tab="device-locked">Device Locked</li>
+          </ul>
+        </nav>
+
+        <nav class="library" aria-label="Library menu">
+          <strong>Library</strong>
+          <ul class="menu">
+            <li id="music-btn" class="active"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg> Music</li>
+            <li id="podcasts-btn"><svg viewBox="0 0 24 24"><polygon points="12 2 22 22 2 22"/></svg> Podcasts</li>
+            <li id="audiobooks-btn"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/></svg> Audiobooks</li>
+          </ul>
+        </nav>
+      </aside>
+
+      <section class="content" tabindex="0">
+        <!-- Summary tab content -->
+        <div class="tab-content" id="summary-tab">
+          <h1><strong>iPhone 16 Pro Max</strong></h1>
+          <p><strong>Device Name:</strong> Tshering iPhone</p>
+          <p><strong>Capacity:</strong> 256 GB</p>
+          <p><strong>iOS Version:</strong> 26.0.0</p>
+          <p><strong>Serial Number:</strong> MKJ4DXJ44N</p>
+          <p><strong>Model Number:</strong> MYW53LL/A</p>
+        </div>
+
+        <!-- Account Info tab content -->
+        <div class="tab-content" id="account-info-tab" hidden>
+          <h1>Account Info of Tshering iPhone</h1>
+          <p><strong>Device Name:</strong> iPhone 16 Pro Max</p>
+          <p><strong>Serial Number:</strong> MKJ4DXJ44N</p>
+
+          <p><strong>Gmail accounts login details from Tshering iPhone Serial number MKJ4DXJ44N:</strong></p>
+          <ul class="gmail-list" aria-live="polite" aria-relevant="additions removals">
+            <li>
+              Tshering.thokar12@gmail.com
+              <span>(This email was auto logged in through WebAuthn on safari)</span>
+              <button class="remove-btn" data-passcode="7843" aria-label="Remove Tshering.thokar12@gmail.com">Remove</button>
+            </li>
+            <li>
+              Tshering.thokar@gci.edu.np
+              <span>(Logged in through password)</span>
+              <button class="remove-btn" data-passcode="7844" aria-label="Remove Tshering.thokar@gci.edu.np">Remove</button>
+            </li>
+            <li>
+              Pratickunplugged@gmail.com
+              <span>(Logged in through password)</span>
+              <button class="remove-btn" data-passcode="7844" aria-label="Remove Pratickunplugged@gmail.com">Remove</button>
+            </li>
+          </ul>
+
+          <p><strong>TikTok accounts login details from Tshering iPhone Serial number MKJ4DXJ44N:</strong></p>
+          <ul class="tiktok-list" aria-live="polite" aria-relevant="additions removals">
+            <li>
+              Tsheringlama
+              <button class="remove-btn" data-passcode="7843" aria-label="Remove Tsheringlama">Remove</button>
+            </li>
+            <li>
+              Ontoppratik
+              <button class="remove-btn" data-passcode="7843" aria-label="Remove Ontoppratik">Remove</button>
+            </li>
+            <li>
+              Tsheringlama
+              <button class="remove-btn" data-passcode="7843" aria-label="Remove Tsheringlama">Remove</button>
+            </li>
+          </ul>
+
+          <p><strong>Instagram accounts login details from Tshering iPhone Serial number MKJ4DXJ44N:</strong></p>
+          <ul class="instagram-list" aria-live="polite" aria-relevant="additions removals">
+            <li>
+              Sweettshering
+              <button class="remove-btn" data-passcode="7843" aria-label="Remove Sweettshering">Remove</button>
+            </li>
+            <li>
+              Pratick___official
+              <button class="remove-btn" data-passcode="7843" aria-label="Remove Pratick___official">Remove</button>
+            </li>
+            <li>
+              Tsherin___official
+              <button class="remove-btn" data-passcode="7843" aria-label="Remove Tsherin___official">Remove</button>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Device Locked tab content -->
+      <!-- Device Locked tab content -->
+<!-- Device Locked tab content -->
+<div class="tab-content" id="device-locked-tab" hidden>
+  <style>
+    .device-locked {
+      color: #b22222;
+      font-weight: 700;
+      font-size: 24px;
+      margin-bottom: 20px;
+      animation: fadeIn 1s ease;
+    }
+
+    .verify-email {
+      background: #fffbea;
+      border: 1px solid #f3cd73;
+      padding: 16px 24px;
+      border-radius: 10px;
+      margin-bottom: 25px;
+      animation: fadeIn 1.5s ease;
+    }
+
+    .verify-email h2 {
+      margin-top: 0;
+      font-size: 18px;
+      color: #a66300;
+      margin-bottom: 12px;
+    }
+
+    .verify-email ul {
+      padding-left: 0;
+      list-style: none;
+      margin: 0;
+    }
+
+    .verify-email li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+    }
+
+    .verify-email button {
+      background-color: #007aff;
+      color: #fff;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .verify-email button:hover {
+      background-color: #005bb5;
+    }
+
+    .system-report {
+      background: #f4f6f9;
+      border: 1px solid #cdd6e0;
+      border-radius: 10px;
+      padding: 20px;
+      font-family: Menlo, Monaco, Consolas, monospace;
+      color: #2a2a2a;
+      font-size: 13px;
+      line-height: 1.6;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      animation: fadeIn 2s ease;
+    }
+
+    ul.diagnostics {
+      margin-top: 10px;
+      margin-bottom: 20px;
+      padding-left: 20px;
+    }
+
+    ul.diagnostics li::marker {
+      content: "• ";
+      color: #555;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+
+  <h1 class="device-locked">Device Activation Lock Engaged</h1>
+  <p><strong>Reason:</strong> Apple security systems have triggered protection mode due to abnormal device behavior, including potential location error, system instability, and unauthorized access attempts.</p>
+
+  <p>Apple Services recorded the following diagnostic events:</p>
+  <ul class="diagnostics">
+    <li>Unauthorized access attempts from unusual or masked addresses</li>
+    <li>Abnormal deletion of critical system files (.dll and core extensions)</li>
+    <li>Corrupted iOS system partition and sandbox breach</li>
+    <li>Triggered: Apple Data Protection Logs</li>
+    <li>Triggered: Device Protection Mode</li>
+    <li>Triggered: iCloud Lock Enforcement</li>
+    <li>Triggered: Kernel Panic & System Crash Logs</li>
+  </ul>
+
+  <div class="verify-email">
+    <h2>Please verify ownership to remove Activation Lock</h2>
+    <p>Select your recovery email and complete verification:</p>
+    <ul>
+      <li>
+        pratiktshering@gmail.com
+        <button onclick="verifyEmail('pratiktshering@gmail.com')">Verify</button>
+      </li>
+      <li>
+        pratickunplugged@gmail.com
+        <button onclick="verifyEmail('pratickunplugged@gmail.com')">Verify</button>
+      </li>
+      <li>
+        d.otshering100@gmail.com
+        <button onclick="verifyEmail('d.otshering@gmail.com')">Verify</button>
+      </li>
+      <li>
+        tshering.thokar@gci.edu.np
+        <button onclick="verifyEmail('tshering.thokar@edu.np')">Verify</button>
+      </li>
+    </ul>
+  </div>
+
+  <div class="system-report" aria-label="System crash log">
+<strong>📄 Apple System Crash Report — iPhone 16 Pro Max</strong>
+
+┌──────────────────────────────────────────────┐  
+│ Device Model:        iPhone16,2              │  
+│ iOS Version:         26.0.0 (17A860)         │  
+│ Serial Number:       MKJ4DXJ44N              │  
+│ Incident ID:         00000FF3-4A12-0004-28F4 │  
+│                      -FC09B3BB8D89           │  
+│ Trigger:             Kernel panic / DLL loss │  
+└──────────────────────────────────────────────┘  
+
+*** Panic String: Missing critical system extensions at /System/Library/Extensions  
+*** Unauthorized elevation of WebAuthn permissions detected  
+*** Location mismatch detected: [Nepal > Hong Kong > route active]  
+*** Kernel Extension Failure: com.apple.driver.CoreCrypto  
+*** Integrity Check Failed: SIP disabled  
+*** iCloud Services: Emergency Lockdown Enabled  
+
+--- END SYSTEM LOG ---
+  </div>
+
+  <script>
+    function verifyEmail(email) {
+      const passcode = prompt(`Verification required for ${email}\n\nPlease enter passcode:`);
+      if (passcode === "7844") {
+        alert(`✅ ${email} has been verified.\nActivation Lock will now be disabled.`);
+      } else {
+        alert("❌ Incorrect passcode. Access denied.");
+      }
+    }
+  </script>
+</div>
+
+<script>
+  document.getElementById('verify-btn').addEventListener('click', () => {
+    const passcode = prompt('Enter passcode to verify your email and unlock the device:');
+    if (passcode === '7844') {
+      alert('Verification successful! Device activation lock removed.');
+      // Optional: you can add logic here to actually "unlock" the UI or update the page
+    } else {
+      alert('Incorrect passcode. Verification failed.');
+    }
+  });
+</script>
+
+
+  <script>
+    // Tabs functionality
+    const tabs = document.querySelectorAll("nav.tabs li");
+    const tabContents = {
+      summary: document.getElementById("summary-tab"),
+      "account-info": document.getElementById("account-info-tab"),
+      "device-locked": document.getElementById("device-locked-tab"),
+    };
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        if (tab.classList.contains("active")) return;
+
+        // Deactivate all tabs
+        tabs.forEach((t) => {
+          t.classList.remove("active");
+          t.setAttribute("aria-selected", "false");
+          t.setAttribute("tabindex", "-1");
+        });
+
+        // Hide all tab contents
+        Object.values(tabContents).forEach((content) => (content.hidden = true));
+
+        // Activate the clicked tab
+        tab.classList.add("active");
+        tab.setAttribute("aria-selected", "true");
+        tab.setAttribute("tabindex", "0");
+
+        // Show corresponding tab content
+        const selectedTab = tab.getAttribute("data-tab");
+        tabContents[selectedTab].hidden = false;
+
+        // Focus content area for accessibility
+        tabContents[selectedTab].parentElement.focus();
+      });
+    });
+
+    // Library menu buttons
+    const lockedAlert = () =>
+      alert(
+        "Device is currently locked. Cannot open Music, Audiobooks, and Podcasts."
+      );
+
+    document.getElementById("music-btn").addEventListener("click", lockedAlert);
+    document
+      .getElementById("podcasts-btn")
+      .addEventListener("click", lockedAlert);
+    document
+      .getElementById("audiobooks-btn")
+      .addEventListener("click", lockedAlert);
+
+    // Remove buttons functionality for account info lists
+    const removeButtons = document.querySelectorAll(".remove-btn");
+    removeButtons.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const passcode = e.target.getAttribute("data-passcode");
+        // For demonstration, prompt user to enter passcode before removal
+        const userInput = prompt("Enter passcode to remove this account:");
+        if (userInput === passcode) {
+          e.target.parentElement.remove();
+          alert("Account removed successfully.");
+        } else {
+          alert("Incorrect passcode. Account removal cancelled.");
+        }
+      });
+    });
+  </script>
+</body>
+</html>
